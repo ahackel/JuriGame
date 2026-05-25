@@ -2,21 +2,42 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+
+  <!-- iPad / PWA -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="JuriGame" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
   <title>JuriGame</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
       background: #1a1a2e;
+      overflow: hidden;
+      /* Prevent iOS rubber-band scroll and tap highlights */
+      overscroll-behavior: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: none;
+    }
+    #game-container {
+      width: 100%;
+      height: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
     }
     #game-container canvas {
       display: block;
+      /* Crisp pixel art scaling */
+      image-rendering: pixelated;
     }
   </style>
 </head>
