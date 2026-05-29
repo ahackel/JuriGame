@@ -14,8 +14,8 @@ export class VirtualJoystick {
       x,
       y,
       radius: 55,
-      base: scene.add.circle(0, 0, 55, 0x444466, 0.55).setDepth(200),
-      thumb: scene.add.circle(0, 0, 28, 0x8888bb, 0.85).setDepth(201),
+      base: scene.add.circle(0, 0, 55, 0x444466, 0.55).setDepth(100000),
+      thumb: scene.add.circle(0, 0, 28, 0x8888bb, 0.85).setDepth(100001),
       forceMin: 16,
       fixed: true
     });

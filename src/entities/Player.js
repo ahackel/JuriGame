@@ -27,21 +27,16 @@ export class Player {
     const moving = inputVector.x !== 0 || inputVector.y !== 0;
 
     if (moving) {
-      const screenDx = (inputVector.x - inputVector.y) * (TILE_W / 2);
-      const screenDy = (inputVector.x + inputVector.y) * (TILE_H / 2);
-      const len = Math.hypot(screenDx, screenDy);
+      const len = Math.hypot(inputVector.x, inputVector.y) || 1;
+      const newX = this.sprite.x + (inputVector.x / len) * PLAYER_SPEED * dt;
+      const newY = this.sprite.y + (inputVector.y / len) * PLAYER_SPEED * dt;
 
-      const newX = this.sprite.x + (screenDx / len) * PLAYER_SPEED * dt;
-      const newY = this.sprite.y + (screenDy / len) * PLAYER_SPEED * dt;
-
-      // Clamp to isometric diamond: convert to screenToTile coords, clamp, convert back
-      // screenToTile gives (col+0.5, row+0.5) for a position at tileCenter(col, row)
       const tile = screenToTile(newX, newY);
       const tc   = Phaser.Math.Clamp(tile.col, 0.5, MAP_COLS - 0.5);
       const tr   = Phaser.Math.Clamp(tile.row, 0.5, MAP_ROWS - 0.5);
 
-      this.sprite.x = ORIGIN_X + (tc - tr) * (TILE_W / 2);
-      this.sprite.y = ORIGIN_Y + (tc + tr) * (TILE_H / 2);
+      this.sprite.x = ORIGIN_X + tc * TILE_W;
+      this.sprite.y = ORIGIN_Y + tr * TILE_H;
 
       // Direction
       const dir = this._resolveDir(inputVector);
@@ -61,12 +56,8 @@ export class Player {
     this.sprite.setDepth(this.sprite.y);
   }
 
-  // Map iso tile-axis input vector to sprite direction
-  // s = x+y: positive → south, e = x-y: positive → east
   _resolveDir(v) {
-    const s = v.x + v.y;
-    const e = v.x - v.y;
-    if (Math.abs(e) >= Math.abs(s)) return e > 0 ? 'right' : 'left';
-    return s > 0 ? 'down' : 'up';
+    if (Math.abs(v.x) >= Math.abs(v.y)) return v.x > 0 ? 'right' : 'left';
+    return v.y > 0 ? 'down' : 'up';
   }
 }

@@ -7,6 +7,8 @@ export class Tree {
     this.row = row;
     this.alive = true;
 
+    this.woodYield = Math.random() < 0.4 ? 3 : 2;
+
     const pos = tileCenter(col, row);
     this.sprite = scene.add.image(pos.x, pos.y, 'tree');
     this.sprite.setOrigin(0.5, 1.0);
@@ -33,6 +35,6 @@ export class Tree {
       ease: 'Power2',
       onComplete: () => this.sprite.destroy()
     });
-    this.scene.events.emit('tree-collected');
+    this.scene.events.emit('tree-collected', this.woodYield);
   }
 }

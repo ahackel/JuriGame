@@ -1,18 +1,19 @@
-export class WoodCounter {
+export class CoinCounter {
   constructor(scene, resources) {
     const iconSize = 40;
     const padding  = 12;
+    const rowY     = padding + iconSize + 8;
 
-    this.icon = scene.add.image(padding, padding, 'wood-icon')
+    this.icon = scene.add.image(padding, rowY, 'coin-icon')
       .setOrigin(0, 0)
       .setDisplaySize(iconSize, iconSize)
       .setScrollFactor(0)
       .setDepth(100000);
 
-    this.text = scene.add.text(padding + iconSize + 6, padding + iconSize / 2, '0', {
+    this.text = scene.add.text(padding + iconSize + 6, rowY + iconSize / 2, '0', {
       fontSize: '22px',
       fontFamily: 'monospace',
-      color: '#ffffff',
+      color: '#ffe066',
       stroke: '#000000',
       strokeThickness: 4
     })
@@ -20,7 +21,7 @@ export class WoodCounter {
       .setScrollFactor(0)
       .setDepth(100000);
 
-    resources.on('wood-changed', (count) => {
+    resources.on('coins-changed', (count) => {
       this.text.setText(`${count}`);
     });
   }
