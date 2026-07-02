@@ -4,13 +4,17 @@ import { Player } from '../entities/Player.js';
 import { Tree } from '../entities/Tree.js';
 import { PaymentField } from '../entities/PaymentField.js';
 import { Shop } from '../entities/Shop.js';
+import { SeedPlant } from '../entities/SeedPlant.js';
 import { InputManager } from '../systems/InputManager.js';
 import { ResourceManager } from '../systems/ResourceManager.js';
-import { CustomerManager } from '../systems/CustomerManager.js';
 import { WoodCounter } from '../ui/WoodCounter.js';
 import { CoinCounter } from '../ui/CoinCounter.js';
+import { SeedCounter } from '../ui/SeedCounter.js';
 import { VirtualJoystick } from '../ui/VirtualJoystick.js';
-import { worldBounds } from '../utils/IsoMath.js';
+import { ShopUI } from '../ui/ShopUI.js';
+import { SowButton } from '../ui/SowButton.js';
+import { worldBounds, tileCenter } from '../utils/IsoMath.js';
+import { TILE_W } from '../constants.js';
 
 export class GameScene extends Phaser.Scene {
   constructor() {
@@ -27,6 +31,7 @@ export class GameScene extends Phaser.Scene {
 
     // Trees
     this.trees = worldMap.getTreePositions().map(({ col, row }) => new Tree(this, col, row));
+    this.plantedSeeds = [];
 
     // Player
     const spawn = worldMap.getSpawnTile();
@@ -39,6 +44,10 @@ export class GameScene extends Phaser.Scene {
     // HUD
     new WoodCounter(this, this.resources);
     new CoinCounter(this, this.resources);
+    new SeedCounter(this, this.resources);
+    this.shopUI = new ShopUI(this, this.resources);
+    this.sowButton = new SowButton(this, this.resources, () => this._sow());
+    this.nearShop = false;
 
     // Camera
     const bounds = worldBounds();
@@ -52,7 +61,7 @@ export class GameScene extends Phaser.Scene {
         label,
         onPurchase: () => {
           new Shop(this, shopCol, shopRow);
-          this.customerManager = new CustomerManager(this, shopCol, shopRow);
+          this.shopCenter = tileCenter(shopCol, shopRow);
         },
       })
     );
@@ -62,8 +71,15 @@ export class GameScene extends Phaser.Scene {
   }
 
   update(_time, delta) {
+    const dt = delta / 1000;
+
+    if (this.shopUI.isOpen) {
+      this.input_.update();
+      return;
+    }
+
     const inputVector = this.input_.update();
-    this.player.update(delta / 1000, inputVector);
+    this.player.update(dt, inputVector);
 
     const playerCol = this.player.isoCol;
     const playerRow = this.player.isoRow;
@@ -76,8 +92,30 @@ export class GameScene extends Phaser.Scene {
       field.checkTrigger(playerCol, playerRow, this.resources);
     }
 
-    if (this.customerManager) {
-      this.customerManager.update(delta / 1000, this.player.sprite.x, this.player.sprite.y, this.resources);
+    if (this.shopCenter) {
+      const dist = Math.hypot(this.player.sprite.x - this.shopCenter.x, this.player.sprite.y - this.shopCenter.y);
+      const near = dist < TILE_W * 1.2;
+
+      if (near && !this.nearShop) {
+        this._growSeeds();
+        this.shopUI.open();
+      }
+      this.nearShop = near;
     }
+  }
+
+  _sow() {
+    if (!this.resources.spendSeeds(1)) return;
+    const col = Math.round(this.player.isoCol);
+    const row = Math.round(this.player.isoRow);
+    this.plantedSeeds.push(new SeedPlant(this, col, row));
+  }
+
+  _growSeeds() {
+    for (const seed of this.plantedSeeds) {
+      seed.destroy();
+      this.trees.push(new Tree(this, seed.col, seed.row));
+    }
+    this.plantedSeeds = [];
   }
 }

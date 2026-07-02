@@ -22,12 +22,14 @@ export class BootScene extends Phaser.Scene {
     this.load.image('player-raw', 'assets/Player.png');
     this.load.image('wood-icon',  'assets/Wood.webp');
     this.load.image('coin-icon',  'assets/Coin.png');
+    this.load.image('seed-icon',  'assets/Seed.png');
+    this.load.image('shop-bg',    'assets/Shop.png');
+    this.load.image('house',      'assets/House.png');
   }
 
   create() {
     this._makeTreeTexture();
     this._makePlayerTexture();
-    this._makeShopTexture();
     this.scene.start('GameScene');
   }
 
@@ -62,54 +64,6 @@ export class BootScene extends Phaser.Scene {
         tex.add(`${dir}_${f}`, 0, PLAYER_START_X + f * PLAYER_FRAME_W, y, PLAYER_FRAME_W, h);
       }
     });
-  }
-
-  _makeShopTexture() {
-    const W = 64, H = 72;
-    const canvas = document.createElement('canvas');
-    canvas.width = W;
-    canvas.height = H;
-    const ctx = canvas.getContext('2d');
-    ctx.imageSmoothingEnabled = false;
-
-    // Roof
-    ctx.fillStyle = '#7a2d0c';
-    ctx.fillRect(0, 0, W, 22);
-    ctx.fillStyle = '#9e3d12';
-    ctx.fillRect(0, 0, W, 10);
-    ctx.fillStyle = '#5a1e08';
-    ctx.fillRect(0, 20, W, 2);
-
-    // Walls
-    ctx.fillStyle = '#d4a96a';
-    ctx.fillRect(0, 22, W, H - 22);
-    ctx.fillStyle = '#c49a58';
-    ctx.fillRect(0, 22, 3, H - 22);
-    ctx.fillStyle = '#b88840';
-    ctx.fillRect(W - 3, 22, 3, H - 22);
-
-    // Windows
-    ctx.fillStyle = '#aaddff';
-    ctx.fillRect(5, 28, 14, 14);
-    ctx.fillRect(45, 28, 14, 14);
-    ctx.fillStyle = '#88aacc';
-    ctx.fillRect(12, 28, 1, 14);
-    ctx.fillRect(5, 35, 14, 1);
-    ctx.fillRect(52, 28, 1, 14);
-    ctx.fillRect(45, 35, 14, 1);
-    ctx.fillStyle = '#5a7a99';
-    ctx.strokeStyle = '#5a7a99';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(5, 28, 14, 14);
-    ctx.strokeRect(45, 28, 14, 14);
-
-    // Door
-    ctx.fillStyle = '#5c2800';
-    ctx.fillRect(23, H - 24, 18, 24);
-    ctx.fillStyle = '#ffd700';
-    ctx.fillRect(37, H - 14, 2, 4);
-
-    this.textures.addCanvas('shop', canvas);
   }
 
   _removeWhite(ctx, w, h) {

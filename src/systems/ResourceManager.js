@@ -3,6 +3,7 @@ export class ResourceManager extends Phaser.Events.EventEmitter {
     super();
     this.wood = 0;
     this.coins = 0;
+    this.seeds = 0;
   }
 
   addWood(n = 1) {
@@ -20,5 +21,17 @@ export class ResourceManager extends Phaser.Events.EventEmitter {
   addCoins(n = 1) {
     this.coins += n;
     this.emit('coins-changed', this.coins);
+  }
+
+  addSeeds(n = 1) {
+    this.seeds += n;
+    this.emit('seeds-changed', this.seeds);
+  }
+
+  spendSeeds(n) {
+    if (this.seeds < n) return false;
+    this.seeds -= n;
+    this.emit('seeds-changed', this.seeds);
+    return true;
   }
 }
