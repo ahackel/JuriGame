@@ -67,9 +67,30 @@ export class GameScene extends Phaser.Scene {
     this.cheatMenu = new CheatMenu(this, this.resources, () => this._restartGame());
     this.input.keyboard.on('keydown-C', () => this.cheatMenu.toggle());
 
+    // Tap 4x in the bottom-right corner to open the cheat menu
+    const CORNER_SIZE = 80;
+    const CORNER_TAP_WINDOW = 800;
+    this._cornerTaps = 0;
+    this._lastCornerTapTime = 0;
+
     // Click/tap to move
     this.moveTarget = null;
     this.input.on('pointerdown', (pointer, currentlyOver) => {
+      if (!this.shopUI.isOpen && !this.cheatMenu.isOpen) {
+        const cam = this.cameras.main;
+        const inCorner = pointer.x > cam.width - CORNER_SIZE && pointer.y > cam.height - CORNER_SIZE;
+        if (inCorner) {
+          const now = this.time.now;
+          this._cornerTaps = (now - this._lastCornerTapTime > CORNER_TAP_WINDOW) ? 1 : this._cornerTaps + 1;
+          this._lastCornerTapTime = now;
+          if (this._cornerTaps >= 4) {
+            this._cornerTaps = 0;
+            this.cheatMenu.toggle();
+          }
+          return;
+        }
+      }
+
       if (currentlyOver.length > 0) return;
       if (this.shopUI.isOpen || this.cheatMenu.isOpen) return;
       this.moveTarget = { x: pointer.worldX, y: pointer.worldY };

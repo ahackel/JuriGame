@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
 
   <!-- iPad / PWA -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="JuriGame" />
@@ -19,9 +19,12 @@
     }
     html, body {
       width: 100%;
-      height: 100%;
+      height: 100vh;
+      height: 100lvh; /* largest viewport size, ignoring Safari's toolbar so it overlaps instead of shrinking us */
       background: #000000;
       overflow: hidden;
+      position: fixed;
+      inset: 0;
       /* Prevent iOS rubber-band scroll and tap highlights */
       overscroll-behavior: none;
       -webkit-tap-highlight-color: transparent;
