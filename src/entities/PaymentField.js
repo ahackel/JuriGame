@@ -2,13 +2,13 @@ import { tileCenter } from '../utils/IsoMath.js';
 import { TILE_W, TILE_H } from '../constants.js';
 
 export class PaymentField {
-  constructor(scene, col, row, config) {
+  constructor(scene, col, row, config, active = true) {
     this.scene   = scene;
     this.col     = col;
     this.row     = row;
     this.config  = config;
-    this.active  = true;
-    this._build();
+    this.active  = active;
+    if (this.active) this._build();
   }
 
   _build() {

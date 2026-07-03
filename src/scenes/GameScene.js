@@ -14,6 +14,7 @@ import { VirtualJoystick } from '../ui/VirtualJoystick.js';
 import { ShopUI } from '../ui/ShopUI.js';
 import { CheatMenu } from '../ui/CheatMenu.js';
 import { SowButton } from '../ui/SowButton.js';
+import { SaveManager } from '../systems/SaveManager.js';
 import { worldBounds, tileCenter } from '../utils/IsoMath.js';
 import { TILE_W } from '../constants.js';
 
@@ -27,15 +28,21 @@ export class GameScene extends Phaser.Scene {
     const worldMap = new WorldMap();
     new TileLayer(this);
 
+    const save = SaveManager.load();
+
     // Resources
     this.resources = new ResourceManager();
 
     // Trees
-    this.trees = worldMap.getTreePositions().map(({ col, row }) => new Tree(this, col, row));
+    if (save) {
+      this.trees = save.trees.map(({ col, row, woodYield }) => new Tree(this, col, row, woodYield));
+    } else {
+      this.trees = worldMap.getTreePositions().map(({ col, row }) => new Tree(this, col, row));
+    }
     this.plantedSeeds = [];
 
     // Player
-    const spawn = worldMap.getSpawnTile();
+    const spawn = save ? save.player : worldMap.getSpawnTile();
     this.player = new Player(this, spawn.col, spawn.row);
 
     // Input
@@ -50,8 +57,14 @@ export class GameScene extends Phaser.Scene {
     this.sowButton = new SowButton(this, this.resources, () => this._sow());
     this.nearShop = false;
 
+    if (save) {
+      this.resources.addWood(save.resources.wood);
+      this.resources.addCoins(save.resources.coins);
+      this.resources.addSeeds(save.resources.seeds);
+    }
+
     // Cheat menu
-    this.cheatMenu = new CheatMenu(this, this.resources);
+    this.cheatMenu = new CheatMenu(this, this.resources, () => this._restartGame());
     this.input.keyboard.on('keydown-C', () => this.cheatMenu.toggle());
 
     // Click/tap to move
@@ -68,19 +81,42 @@ export class GameScene extends Phaser.Scene {
     this.cameras.main.startFollow(this.player.sprite, true, 0.1, 0.1);
 
     // Payment fields
-    this.paymentFields = worldMap.getPaymentFields().map(({ col, row, cost, label, shopCol, shopRow }) =>
-      new PaymentField(this, col, row, {
+    this.paymentFields = worldMap.getPaymentFields().map(({ col, row, cost, label, shopCol, shopRow }, i) => {
+      const savedActive = save?.paymentFields?.[i]?.active ?? true;
+      const field = new PaymentField(this, col, row, {
         cost,
         label,
         onPurchase: () => {
           new Shop(this, shopCol, shopRow);
           this.shopCenter = tileCenter(shopCol, shopRow);
+          this._saveGame();
         },
-      })
-    );
+      }, savedActive);
+      if (!savedActive) {
+        new Shop(this, shopCol, shopRow);
+        this.shopCenter = tileCenter(shopCol, shopRow);
+      }
+      return field;
+    });
+
+    // Restore planted seeds
+    if (save) {
+      for (const { col, row } of save.plantedSeeds) {
+        this.plantedSeeds.push(new SeedPlant(this, col, row));
+      }
+    }
 
     // Tree collection event
-    this.events.on('tree-collected', (amount) => this.resources.addWood(amount));
+    this.events.on('tree-collected', (amount) => {
+      this.resources.addWood(amount);
+      this._saveGame();
+    });
+
+    // Autosave
+    this.time.addEvent({ delay: 5000, loop: true, callback: () => this._saveGame() });
+    const beforeUnloadHandler = () => this._saveGame();
+    window.addEventListener('beforeunload', beforeUnloadHandler);
+    this.events.once('shutdown', () => window.removeEventListener('beforeunload', beforeUnloadHandler));
   }
 
   update(_time, delta) {
@@ -136,6 +172,7 @@ export class GameScene extends Phaser.Scene {
     const col = Math.round(this.player.isoCol);
     const row = Math.round(this.player.isoRow);
     this.plantedSeeds.push(new SeedPlant(this, col, row));
+    this._saveGame();
   }
 
   _growSeeds() {
@@ -144,5 +181,27 @@ export class GameScene extends Phaser.Scene {
       this.trees.push(new Tree(this, seed.col, seed.row));
     }
     this.plantedSeeds = [];
+    this._saveGame();
+  }
+
+  _saveGame() {
+    SaveManager.save({
+      resources: {
+        wood: this.resources.wood,
+        coins: this.resources.coins,
+        seeds: this.resources.seeds,
+      },
+      player: { col: this.player.isoCol, row: this.player.isoRow },
+      trees: this.trees
+        .filter((t) => t.alive)
+        .map((t) => ({ col: t.col, row: t.row, woodYield: t.woodYield })),
+      plantedSeeds: this.plantedSeeds.map((s) => ({ col: s.col, row: s.row })),
+      paymentFields: this.paymentFields.map((f) => ({ active: f.active })),
+    });
+  }
+
+  _restartGame() {
+    SaveManager.clear();
+    this.scene.restart();
   }
 }

@@ -1,7 +1,8 @@
 export class CheatMenu {
-  constructor(scene, resources) {
+  constructor(scene, resources, onRestart) {
     this.scene = scene;
     this.resources = resources;
+    this.onRestart = onRestart;
     this.isOpen = false;
 
     const cam = scene.cameras.main;
@@ -42,6 +43,12 @@ export class CheatMenu {
         this.close();
       });
     });
+
+    const restartButton = this._makeButton(
+      centerX, centerY - 60 + cheats.length * 56, 200, 48, 'Spiel neu starten', depth + 1,
+      () => this.onRestart && this.onRestart()
+    );
+    restartButton.rect.setFillStyle(0x8a2020, 0.9);
 
     this.setVisible(false);
   }

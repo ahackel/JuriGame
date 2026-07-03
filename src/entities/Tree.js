@@ -1,13 +1,13 @@
 import { tileCenter } from '../utils/IsoMath.js';
 
 export class Tree {
-  constructor(scene, col, row) {
+  constructor(scene, col, row, woodYield = null) {
     this.scene = scene;
     this.col = col;
     this.row = row;
     this.alive = true;
 
-    this.woodYield = Math.random() < 0.4 ? 3 : 2;
+    this.woodYield = woodYield ?? (Math.random() < 0.4 ? 3 : 2);
 
     const pos = tileCenter(col, row);
     this.sprite = scene.add.image(pos.x, pos.y, 'tree');
