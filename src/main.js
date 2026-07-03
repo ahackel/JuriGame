@@ -8,10 +8,10 @@ new Phaser.Game({
   parent: 'game-container',
   width: 800,
   height: 600,
-  backgroundColor: '#1a2e1a',
+  backgroundColor: '#000000',
   scale: {
-    mode: Phaser.Scale.HEIGHT_CONTROLS_WIDTH,
-    autoCenter: Phaser.Scale.NO_CENTER
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH
   },
   plugins: {
     global: [

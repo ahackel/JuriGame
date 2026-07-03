@@ -15,12 +15,10 @@ export class ShopUI {
     this.elements = [];
 
     const bgImg = scene.textures.get('shop-bg').getSourceImage();
-    const coverScale = Math.max(cam.width / bgImg.width, cam.height / bgImg.height);
-
     this.bg = scene.add.image(centerX, centerY, 'shop-bg')
       .setScrollFactor(0)
       .setDepth(depth)
-      .setScale(coverScale);
+      .setDisplaySize(cam.width, cam.height);
     this.elements.push(this.bg);
 
     this.title = scene.add.text(centerX, margin + 8, 'Shop', {

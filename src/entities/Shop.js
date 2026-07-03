@@ -12,12 +12,5 @@ export class Shop {
       .setOrigin(0.5, 1.0)
       .setScale(scale)
       .setDepth(pos.y);
-
-    scene.tweens.add({
-      targets: this.sprite,
-      scaleY: { from: 0, to: scale },
-      duration: 400,
-      ease: 'Back.easeOut',
-    });
   }
 }

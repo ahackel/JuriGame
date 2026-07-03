@@ -23,6 +23,7 @@ export class BootScene extends Phaser.Scene {
     this.load.image('wood-icon',  'assets/Wood.webp');
     this.load.image('coin-icon',  'assets/Coin.png');
     this.load.image('seed-icon',  'assets/Seed.png');
+    this.load.image('plant',      'assets/Plant.png');
     this.load.image('shop-bg',    'assets/Shop.png');
     this.load.image('house',      'assets/House.png');
   }

@@ -12,6 +12,7 @@ import { CoinCounter } from '../ui/CoinCounter.js';
 import { SeedCounter } from '../ui/SeedCounter.js';
 import { VirtualJoystick } from '../ui/VirtualJoystick.js';
 import { ShopUI } from '../ui/ShopUI.js';
+import { CheatMenu } from '../ui/CheatMenu.js';
 import { SowButton } from '../ui/SowButton.js';
 import { worldBounds, tileCenter } from '../utils/IsoMath.js';
 import { TILE_W } from '../constants.js';
@@ -49,6 +50,18 @@ export class GameScene extends Phaser.Scene {
     this.sowButton = new SowButton(this, this.resources, () => this._sow());
     this.nearShop = false;
 
+    // Cheat menu
+    this.cheatMenu = new CheatMenu(this, this.resources);
+    this.input.keyboard.on('keydown-C', () => this.cheatMenu.toggle());
+
+    // Click/tap to move
+    this.moveTarget = null;
+    this.input.on('pointerdown', (pointer, currentlyOver) => {
+      if (currentlyOver.length > 0) return;
+      if (this.shopUI.isOpen || this.cheatMenu.isOpen) return;
+      this.moveTarget = { x: pointer.worldX, y: pointer.worldY };
+    });
+
     // Camera
     const bounds = worldBounds();
     this.cameras.main.setBounds(bounds.x, bounds.y, bounds.width, bounds.height);
@@ -73,12 +86,26 @@ export class GameScene extends Phaser.Scene {
   update(_time, delta) {
     const dt = delta / 1000;
 
-    if (this.shopUI.isOpen) {
+    if (this.shopUI.isOpen || this.cheatMenu.isOpen) {
       this.input_.update();
       return;
     }
 
-    const inputVector = this.input_.update();
+    let inputVector = this.input_.update();
+
+    if (inputVector.x !== 0 || inputVector.y !== 0) {
+      this.moveTarget = null;
+    } else if (this.moveTarget) {
+      const dx = this.moveTarget.x - this.player.sprite.x;
+      const dy = this.moveTarget.y - this.player.sprite.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist < 4) {
+        this.moveTarget = null;
+      } else {
+        inputVector = { x: dx / dist, y: dy / dist };
+      }
+    }
+
     this.player.update(dt, inputVector);
 
     const playerCol = this.player.isoCol;

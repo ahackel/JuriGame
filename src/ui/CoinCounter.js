@@ -13,7 +13,7 @@ export class CoinCounter {
     this.text = scene.add.text(padding + iconSize + 6, rowY + iconSize / 2, '0', {
       fontSize: '22px',
       fontFamily: 'monospace',
-      color: '#ffe066',
+      color: '#ffffff',
       stroke: '#000000',
       strokeThickness: 4
     })

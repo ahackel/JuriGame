@@ -6,9 +6,9 @@ export class SeedPlant {
     this.row = row;
 
     const pos = tileCenter(col, row);
-    this.sprite = scene.add.image(pos.x, pos.y, 'seed-icon')
+    this.sprite = scene.add.image(pos.x, pos.y, 'plant')
       .setOrigin(0.5, 1.0)
-      .setDisplaySize(18, 18)
+      .setDisplaySize(9, 9)
       .setDepth(pos.y);
   }
 
